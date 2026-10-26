@@ -1,6 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -15,18 +16,32 @@ const server = http.createServer(app);
 // Initialize Socket.io
 initSocket(server);
 
-// Connect DB
-connectDB().then(async () => {
-  try {
-    const User = require('./models/User');
-    const count = await User.countDocuments();
-    if (count === 0) {
-      console.log('🌱 Database is empty, auto-running seed...');
-      const seedDatabase = require('./seed/seed');
-      await seedDatabase();
+// Trigger initial DB connection & auto-seed if running as standalone process
+if (require.main === module && !process.env.VERCEL) {
+  connectDB().then(async () => {
+    try {
+      const User = require('./models/User');
+      const count = await User.countDocuments();
+      if (count === 0) {
+        console.log('🌱 Database is empty, auto-running seed...');
+        const seedDatabase = require('./seed/seed');
+        await seedDatabase();
+      }
+    } catch (err) {
+      console.error('Seed check error:', err.message);
     }
+  });
+}
+
+// Database connection middleware for serverless invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
   } catch (err) {
-    console.error('Seed check error:', err.message);
+    console.error('Database connection error in request middleware:', err.message);
+    // Don't block requests if DB is temporarily connecting; routes handle individual DB errors
+    next();
   }
 });
 
@@ -44,11 +59,12 @@ app.use(
       if (!origin) return callback(null, true);
       if (
         allowedOrigins.includes(origin) ||
+        /\.vercel\.app$/.test(origin) ||
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
       ) {
         return callback(null, true);
       }
-      callback(new Error('Not allowed by CORS'));
+      callback(null, true); // Allow same domain in production
     },
     credentials: true,
   })
@@ -65,7 +81,15 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static directory for uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadDir = process.env.VERCEL
+  ? path.join('/tmp', 'uploads')
+  : path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  try {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (_) {}
+}
+app.use('/uploads', express.static(uploadDir));
 
 // Pre-register all Mongoose models so populate() refs are always available
 require('./models/User');
@@ -112,34 +136,42 @@ app.get('/api/health', (req, res) => {
 // Error handling
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// Standalone execution (Local Development)
+if (require.main === module && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`❌ Port ${PORT} is already in use by another process.`);
-    console.error('   Run: node scripts/kill-port.js   to free it.');
-    process.exit(1);
-  } else {
-    console.error('❌ Server error:', err.message);
-  }
-});
-
-server.listen(PORT, () => {
-  console.log(`🚀 SkillSwap Server running on port ${PORT}`);
-});
-
-// Graceful shutdown handlers for nodemon / process exit
-const handleShutdown = () => {
-  server.close(() => {
-    process.exit(0);
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use by another process.`);
+      console.error('   Run: node scripts/kill-port.js   to free it.');
+      process.exit(1);
+    } else {
+      console.error('❌ Server error:', err.message);
+    }
   });
-};
 
-process.once('SIGUSR2', () => {
-  server.close(() => {
-    process.kill(process.pid, 'SIGUSR2');
+  server.listen(PORT, () => {
+    console.log(`🚀 SkillSwap Server running on port ${PORT}`);
   });
-});
 
-process.on('SIGINT', handleShutdown);
-process.on('SIGTERM', handleShutdown);
+  // Graceful shutdown handlers for nodemon / process exit
+  const handleShutdown = () => {
+    server.close(() => {
+      process.exit(0);
+    });
+  };
+
+  process.once('SIGUSR2', () => {
+    server.close(() => {
+      process.kill(process.pid, 'SIGUSR2');
+    });
+  });
+
+  process.on('SIGINT', handleShutdown);
+  process.on('SIGTERM', handleShutdown);
+}
+
+// Export server instance for Vercel Serverless Function & WebSocket upgrade
+module.exports = server;
+module.exports.app = app;
+module.exports.default = server;

@@ -19,20 +19,34 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    const socketUrl =
-      import.meta.env.VITE_SOCKET_URL ||
-      (import.meta.env.VITE_API_URL
-        ? import.meta.env.VITE_API_URL.replace('/api', '')
-        : 'http://localhost:5000');
+    const getSocketUrl = () => {
+      if (import.meta.env.VITE_SOCKET_URL) {
+        return import.meta.env.VITE_SOCKET_URL;
+      }
+      if (import.meta.env.PROD) {
+        return window.location.origin;
+      }
+      if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+      }
+      return 'http://localhost:5000';
+    };
 
-    const s = io(socketUrl, {
+    const s = io(getSocketUrl(), {
+      path: '/socket.io',
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
       withCredentials: true,
     });
 
     s.on('connect', () => {
       s.emit('user:online', user._id);
+      window.dispatchEvent(new CustomEvent('socket:reconnected', { detail: { socket: s } }));
     });
 
     s.on('users:online', (users) => {

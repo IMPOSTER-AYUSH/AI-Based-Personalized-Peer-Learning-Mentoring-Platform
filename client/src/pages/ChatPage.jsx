@@ -183,7 +183,15 @@ export const ChatPage = () => {
       socket.emit('chat:join', activeConversation._id);
     }
 
+    const handleReconnect = () => {
+      if (socket && activeConversation?._id) {
+        socket.emit('chat:join', activeConversation._id);
+      }
+    };
+    window.addEventListener('socket:reconnected', handleReconnect);
+
     return () => {
+      window.removeEventListener('socket:reconnected', handleReconnect);
       if (socket) {
         socket.emit('chat:leave', activeConversation._id);
       }

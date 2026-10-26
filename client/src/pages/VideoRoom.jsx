@@ -44,6 +44,13 @@ export const VideoRoom = () => {
   useEffect(() => {
     let localMediaStream;
 
+    const handleVideoReconnect = () => {
+      if (socket && roomId) {
+        socket.emit('chat:join', roomId);
+      }
+    };
+    window.addEventListener('socket:reconnected', handleVideoReconnect);
+
     const startMedia = async () => {
       try {
         localMediaStream = await navigator.mediaDevices.getUserMedia({
@@ -130,6 +137,7 @@ export const VideoRoom = () => {
     startMedia();
 
     return () => {
+      window.removeEventListener('socket:reconnected', handleVideoReconnect);
       if (localMediaStream) {
         localMediaStream.getTracks().forEach((t) => t.stop());
       }
