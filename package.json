@@ -13,5 +13,9 @@
     "install:server": "npm --prefix server install",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.64.0",
+    "@rollup/rollup-linux-x64-musl": "4.64.0"
   }
 }
