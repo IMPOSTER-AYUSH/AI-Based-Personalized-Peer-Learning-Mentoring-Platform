@@ -1,0 +1,175 @@
+/* Progress Page - Finnova Inspired Theme */
+.prog-page-outer {
+  background-color: #edeaf5;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(99, 85, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.07) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+  min-height: calc(100vh - 4.25rem);
+  padding: 5.5rem 1.25rem 4rem;
+  transition: background-color 0.25s ease;
+}
+
+.dark .prog-page-outer {
+  background-color: #0b0c16;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(99, 85, 255, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+}
+
+@media (min-width: 640px) {
+  .prog-page-outer {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .prog-page-outer {
+    padding-left: 2.75rem;
+    padding-right: 2.75rem;
+  }
+}
+
+.prog-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Tier Banner - Deep Navy Inspired */
+.prog-tier-banner {
+  background: #131424;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2rem;
+  padding: 2rem;
+  color: #ffffff;
+  box-shadow: 0 16px 40px -8px rgba(19, 20, 36, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .prog-tier-banner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.prog-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(91, 71, 251, 0.25);
+  color: #a5b4fc;
+  border: 1px solid rgba(91, 71, 251, 0.4);
+}
+
+.prog-tier-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.75rem, 3.2vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  margin: 0.4rem 0;
+}
+
+.prog-xp-widget {
+  background: #1c1d32;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  min-width: 220px;
+}
+
+/* 4 Metric Cards */
+.prog-quad-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .prog-quad-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .prog-quad-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.prog-metric-card {
+  background: #ffffff;
+  border: 1px solid #e8e6f3;
+  border-radius: 1.5rem;
+  padding: 1.35rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.025);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .prog-metric-card {
+  background: #151627;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.prog-metric-card:hover {
+  transform: translateY(-3px);
+  border-color: #5b47fb;
+  box-shadow: 0 10px 24px rgba(91, 71, 251, 0.08);
+}
+
+.dark .prog-metric-card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* General Section White Card */
+.prog-section-card {
+  background: #ffffff;
+  border: 1px solid #e8e6f3;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.025);
+}
+
+.dark .prog-section-card {
+  background: #151627;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.prog-section-h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #11142d;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dark .prog-section-h2 {
+  color: #f8fafc;
+}
